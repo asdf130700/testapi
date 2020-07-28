@@ -12,7 +12,7 @@
         // map 생성
         // Tmap.map을 이용하여, 지도가 들어갈 div, 넓이, 높이를 설정합니다.
         map = new Tmapv2.Map("map_div", {
-          //center : new Tmapv2.LatLng(33.4986492, 126.5254085), // 지도 초기 좌표
+          center: new Tmapv2.LatLng(37.566481622437934, 126.98502302169841), // 지도 초기 좌표
           width: "100%", // map의 width 설정
           height: "400px", // map의 height 설정
         });
@@ -37,8 +37,8 @@
         var optionObj = {
           reqCoordType: "WGS84GEO", //요청 좌표계 옵셥 설정입니다.
           resCoordType: "WGS84GEO", //응답 좌표계 옵셥 설정입니다.
-          centerLon: 126.5254085, //POI검색시 중앙좌표의 경도입니다.
-          centerLat: 33.4986492, //POI검색시 중앙좌표의 위도입니다.
+          centerLon: 126.925356, //POI검색시 중앙좌표의 경도입니다.
+          centerLat: 37.554034, //POI검색시 중앙좌표의 위도입니다.
         };
         var params = {
           onComplete: onComplete,
@@ -47,7 +47,7 @@
         };
         var tData = new Tmapv2.extension.TData();
         tData.getPOIDataFromSearchJson(
-          encodeURIComponent("주유소"),
+          encodeURIComponent("호프집"),
           optionObj,
           params
         ); //encodeURIComponent함수로 해당 파라메터 값을 처리합니다.
@@ -74,7 +74,7 @@
         } else {
           alert("검색결과가 없습니다.");
         }
-        map.setCenter(new Tmapv2.LatLng(33.4986492, 126.5254085));
+        map.setCenter(new Tmapv2.LatLng(37.554034, 126.925356));
         map.setZoom(14);
       }
 
