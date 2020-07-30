@@ -9,6 +9,8 @@
       var map;
       var geo_lat;
       var geo_lon;
+      var lat;
+      var lon;
       // 페이지가 로딩이 된 후 호출하는 함수입니다.
       function initTmap() {
         // map 생성
@@ -43,62 +45,48 @@
           });
         }
       }
-      //마커의 옵션을 설정해주는 함수입니다.
-      function addMarker(lonlatoption) {
-        // 마커 생성
-        var marker = new Tmapv2.Marker({
-          position: new Tmapv2.LatLng(
-            lonlatoption.lonlat.latitude(),
-            lonlatoption.lonlat.longitude()
-          ), //Marker의 중심좌표 설정.
-          map: map, //Marker가 표시될 Map 설정..
-          title: lonlatoption.title, //마우스 위치시 출력할 타이틀
-        });
-      }
+       //경로안내 요청 함수
+       function getRP() {
+        var s_latlng = new Tmapv2.LatLng(geo_lon, geo_lat);
+        var e_latlng = new Tmapv2.LatLng(lat, lon);
 
-      //특정 장소를 검색하는 함수입니다.
-      function searchPOI() {
-        var center = map.getCenter(); //map의 중심 좌표 값을 받아 옵니다.
         var optionObj = {
           reqCoordType: "WGS84GEO", //요청 좌표계 옵셥 설정입니다.
           resCoordType: "WGS84GEO", //응답 좌표계 옵셥 설정입니다.
-          centerLon: 126.57212099999998, //POI검색시 중앙좌표의 경도입니다.
-          centerLat: 33.44272999999999, //POI검색시 중앙좌표의 위도입니다.
+          trafficInfo: "Y",
         };
+
         var params = {
           onComplete: onComplete,
           onProgress: onProgress,
           onError: onError,
         };
+
+        // TData 객체 생성
         var tData = new Tmapv2.extension.TData();
-        tData.getPOIDataFromSearchJson(
-          encodeURIComponent("편의점"),
-          optionObj,
-          params
-        ); //encodeURIComponent함수로 해당 파라메터 값을 처리합니다.
+
+        // TData 객체의 경로요청 함수
+        tData.getRoutePlanJson(s_latlng, e_latlng, optionObj, params);
       }
 
-      //POI검색
+      //경로안내
       function onComplete() {
-        console.log(this._responseData); //json로 데이터를 받은 정보들을 콘솔창에서 확인할 수 있습니다.
+        console.log(this._responseData); //json으로 데이터를 받은 정보들을 콘솔창에서 확인할 수 있습니다.
 
-        if (this._responseData.searchPoiInfo.pois.poi != "") {
-          jQuery(this._responseData.searchPoiInfo.pois.poi[0]).each(function () {
-            //결과를 each문으로 돌려 마커를 등록합니다.
-            //response 데이터중 원하는 값을 find 함수로 찾습니다.
-            var name = this.name;
-            var id = this.id;
-            var lon = this.frontLon;
-            var lat = this.frontLat;
-            var lonlatoption = {
-              title: name, //마커 라벨 text 설정
-              lonlat: new Tmapv2.LatLng(lat, lon), //마커 라벨 좌표 설정
-            };
-            addMarker(lonlatoption); //마커를 추가하는 함수입니다.
-          });
-        } else {
-          alert("검색결과가 없습니다.");
-        }
+        var jsonObject = new Tmapv2.extension.GeoJSON();
+        var jsonForm = jsonObject.rpTrafficRead(this._responseData);
+
+        //교통정보 표출시 생성되는 LineColor 입니다.
+        var trafficColors = {
+          // 사용자가 임의로 색상을 설정할 수 있습니다.
+          // 교통정보 옵션 - 라인색상
+          trafficDefaultColor: "#000000", //교통 정보가 없을 때
+          trafficType1Color: "#009900", //원할
+          trafficType2Color: "#7A8E0A", //서행
+          trafficType3Color: "#8E8111", //정체
+          trafficType4Color: "#FF0000", //정체
+        };
+        jsonObject.drawRouteByTraffic(map, jsonForm, trafficColors);
         map.setCenter(new Tmapv2.LatLng(geo_lat, geo_lon));
         map.setZoom(14);
       }
@@ -117,7 +105,7 @@
     <div id="map_div"></div>
     위도 : <span id = "latitude"></span></br>
     경도 : <span id = "longitude"></span></br>
-
-    <button onClick="searchPOI()">POI검색 실행</button>
+    poi위도 : <span id = "frontLon"></span></br>
+    <button onClick="getRP()">POI검색 실행</button>
   </body>
 </html>

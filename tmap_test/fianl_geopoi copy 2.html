@@ -1,14 +1,15 @@
-<!DOCTYPE html>
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>simpleMap</title>
-    <script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://apis.openapi.sk.com/tmap/jsv2?version=1&appKey=l7xxb88000c3454247eab158acc8a7094995"></script>
     <script type="text/javascript">
       var map;
       var geo_lat;
       var geo_lon;
+      var poi_lat;
+      var poi_lon;
       // 페이지가 로딩이 된 후 호출하는 함수입니다.
       function initTmap() {
         // map 생성
@@ -24,7 +25,10 @@
             $("#longitude").html(position.coords.longitude);
             var geo_lat = position.coords.latitude;
             var geo_lon = position.coords.longitude;
-
+            var content = "<div style=' position: relative; border-bottom: 1px solid #dcdcdc; line-height: 18px; padding: 0 35px 2px 0;'>"
+							+ "<div style='font-size: 12px; line-height: 15px;'>"
+							+ "<span style='display: inline-block; width: 14px; height: 14px; background-image: url(/resources/images/common/icon_blet.png); vertical-align: middle; margin-right: 5px;'></span>현재위치"
+							+ "</div>" + "</div>";
             marker = new Tmapv2.Marker({
               position: new Tmapv2.LatLng(geo_lat, geo_lon),
               map: map,
@@ -35,6 +39,7 @@
               type: 2,
               map: map,
             });
+            
             map.setCenter(new Tmapv2.LatLng(geo_lat, geo_lon));
             map.setZoom(20);
           });
@@ -55,12 +60,12 @@
 
       //특정 장소를 검색하는 함수입니다.
       function searchPOI() {
-        var center = map.getCenter(); //map의 중심 좌표 값을 받아 옵니다.
+        // var center = map.getCenter(geo_lat,geo_lon); //map의 중심 좌표 값을 받아 옵니다.
         var optionObj = {
           reqCoordType: "WGS84GEO", //요청 좌표계 옵셥 설정입니다.
           resCoordType: "WGS84GEO", //응답 좌표계 옵셥 설정입니다.
-          centerLon: 126.572121, //POI검색시 중앙좌표의 경도입니다.
-          centerLat: 33.44273, //POI검색시 중앙좌표의 위도입니다.
+          centerLon: 126.57212099999998, //POI검색시 중앙좌표의 경도입니다.
+          centerLat: 33.44272999999999, //POI검색시 중앙좌표의 위도입니다.
         };
         var params = {
           onComplete: onComplete,
@@ -80,13 +85,17 @@
         console.log(this._responseData); //json로 데이터를 받은 정보들을 콘솔창에서 확인할 수 있습니다.
 
         if (this._responseData.searchPoiInfo.pois.poi != "") {
-          jQuery(this._responseData.searchPoiInfo.pois.poi).each(function () {
+          jQuery(this._responseData.searchPoiInfo.pois.poi[0]).each(function () {
             //결과를 each문으로 돌려 마커를 등록합니다.
             //response 데이터중 원하는 값을 find 함수로 찾습니다.
             var name = this.name;
             var id = this.id;
             var lon = this.frontLon;
             var lat = this.frontLat;
+            console.log(this.frontLon);
+            console.log(this.frontLat);
+            var poi_lon = this.frontLon
+            var poi_lat =this.frontLat
             var lonlatoption = {
               title: name, //마커 라벨 text 설정
               lonlat: new Tmapv2.LatLng(lat, lon), //마커 라벨 좌표 설정
@@ -96,25 +105,25 @@
         } else {
           alert("검색결과가 없습니다.");
         }
-        map.setCenter(new Tmapv2.LatLng(geo_lat, geo_lon));
+        // map.setCenter(new Tmapv2.LatLng());
         map.setZoom(14);
       }
-
-      //데이터 로드중 실행하는 함수입니다.
       function onProgress() {}
 
-      //데이터 로드 중 에러가 발생시 실행하는 함수입니다.
-      function onError() {
-        alert("onError");
-      }
+//데이터 로드 중 에러가 발생시 실행하는 함수입니다.
+  function onError() {
+    alert("onError");
+  }
+
+
     </script>
   </head>
-  <body onload="initTmap()">
     <!-- 맵 생성 실행 -->
     <div id="map_div"></div>
     위도 : <span id = "latitude"></span></br>
     경도 : <span id = "longitude"></span></br>
 
     <button onClick="searchPOI()">POI검색 실행</button>
+    <!-- <button onClick="getRP()">경로검색 실행</button> -->
   </body>
 </html>
